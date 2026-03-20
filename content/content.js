@@ -12,7 +12,6 @@
     showProgress: true,
     keyNext: "ArrowDown",
     keyPrev: "ArrowUp",
-    keyToggle: "KeyR",
     highlightStyle: "glow",
   };
 
@@ -28,27 +27,38 @@
   let progressBar = null;
   let counterEl = null;
   let controlsEl = null;
+  let resizeHandler = null;
+
+  const PARAGRAPH_SELECTORS = [
+    "p",
+    "li",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "blockquote",
+    "pre",
+    "td",
+    "article > *",
+    "[class*='markdown'] > *",
+    "[class*='prose'] > *",
+    "[data-message-author-role] [class*='markdown'] > *",
+    ".text-base [class*='markdown'] > *",
+    "[class*='message-content'] > *",
+    "[class*='response-body'] > *",
+    "[class*='answer'] > *",
+    ".post-content > *",
+    ".entry-content > *",
+    ".article-body > *",
+    "main p",
+    "main li",
+  ];
 
   function collectParagraphs() {
-    const selectors = [
-      "p",
-      "li",
-      "h1", "h2", "h3", "h4", "h5", "h6",
-      "blockquote",
-      "pre",
-      "td",
-      "[class*='message']",
-      "[class*='response']",
-      "[class*='answer']",
-      "[class*='markdown'] > *",
-    ];
-
-    const candidates = document.querySelectorAll(selectors.join(", "));
+    const candidates = document.querySelectorAll(PARAGRAPH_SELECTORS.join(", "));
     const seen = new Set();
     const results = [];
 
     for (const el of candidates) {
       if (seen.has(el)) continue;
+      if (el.closest(".readfocus-controls, .readfocus-counter, .readfocus-progress")) continue;
 
       const text = (el.textContent || "").trim();
       if (text.length < 10) continue;
@@ -57,7 +67,7 @@
       if (rect.width === 0 || rect.height === 0) continue;
 
       const style = window.getComputedStyle(el);
-      if (style.display === "none" || style.visibility === "hidden") continue;
+      if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") continue;
 
       seen.add(el);
 
@@ -70,19 +80,24 @@
       }
       if (dominated) continue;
 
-      results.push({ el, rect, text });
+      const filteredResults = [];
+      for (const other of results) {
+        if (el.contains(other.el) && el !== other.el) continue;
+        filteredResults.push(other);
+      }
+      results.length = 0;
+      results.push(...filteredResults);
+
+      results.push({ el, top: rect.top + window.scrollY });
     }
 
-    results.sort((a, b) => {
-      const aTop = a.rect.top + window.scrollY;
-      const bTop = b.rect.top + window.scrollY;
-      return aTop - bTop;
-    });
-
+    results.sort((a, b) => a.top - b.top);
     return results.map((r) => r.el);
   }
 
   function createOverlays() {
+    if (overlayTop) return;
+
     overlayTop = document.createElement("div");
     overlayTop.className = "readfocus-overlay--top";
     document.body.appendChild(overlayTop);
@@ -90,6 +105,10 @@
     overlayBottom = document.createElement("div");
     overlayBottom.className = "readfocus-overlay--bottom";
     document.body.appendChild(overlayBottom);
+  }
+
+  function createProgressUI() {
+    if (progressBar) return;
 
     progressBar = document.createElement("div");
     progressBar.className = "readfocus-progress";
@@ -100,22 +119,32 @@
     document.body.appendChild(counterEl);
   }
 
+  function removeProgressUI() {
+    if (progressBar && progressBar.parentNode) progressBar.parentNode.removeChild(progressBar);
+    if (counterEl && counterEl.parentNode) counterEl.parentNode.removeChild(counterEl);
+    progressBar = null;
+    counterEl = null;
+  }
+
   function createControls() {
+    if (controlsEl) return;
+
     controlsEl = document.createElement("div");
     controlsEl.className = "readfocus-controls";
 
     const btnUp = document.createElement("button");
     btnUp.innerHTML = "&#9650;";
     btnUp.title = "Previous paragraph (Up Arrow)";
-    btnUp.addEventListener("click", () => moveTo(currentIndex - 1));
+    btnUp.addEventListener("click", (e) => { e.stopPropagation(); moveTo(currentIndex - 1); });
 
     const btnPause = document.createElement("button");
-    btnPause.innerHTML = isPaused ? "&#9654;" : "&#9646;&#9646;";
-    btnPause.title = "Pause/Resume auto-scroll";
     btnPause.className = "readfocus-btn-pause";
-    btnPause.addEventListener("click", () => {
+    btnPause.title = "Pause/Resume auto-scroll";
+    updatePauseButton(btnPause);
+    btnPause.addEventListener("click", (e) => {
+      e.stopPropagation();
       isPaused = !isPaused;
-      btnPause.innerHTML = isPaused ? "&#9654;" : "&#9646;&#9646;";
+      updatePauseButton(btnPause);
       if (isPaused) {
         stopAutoScroll();
       } else {
@@ -126,13 +155,13 @@
     const btnDown = document.createElement("button");
     btnDown.innerHTML = "&#9660;";
     btnDown.title = "Next paragraph (Down Arrow)";
-    btnDown.addEventListener("click", () => moveTo(currentIndex + 1));
+    btnDown.addEventListener("click", (e) => { e.stopPropagation(); moveTo(currentIndex + 1); });
 
     const btnStop = document.createElement("button");
     btnStop.innerHTML = "&#10005;";
     btnStop.title = "Stop ReadFocus";
     btnStop.className = "readfocus-btn-stop";
-    btnStop.addEventListener("click", deactivate);
+    btnStop.addEventListener("click", (e) => { e.stopPropagation(); deactivate(); });
 
     controlsEl.appendChild(btnUp);
     controlsEl.appendChild(btnPause);
@@ -142,19 +171,36 @@
     document.body.appendChild(controlsEl);
   }
 
-  function removeUI() {
-    [overlayTop, overlayBottom, progressBar, counterEl, controlsEl].forEach(
-      (el) => {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      }
-    );
-    overlayTop = overlayBottom = progressBar = counterEl = controlsEl = null;
+  function removeControls() {
+    if (controlsEl && controlsEl.parentNode) controlsEl.parentNode.removeChild(controlsEl);
+    controlsEl = null;
+  }
+
+  function updatePauseButton(btn) {
+    if (!btn) return;
+    btn.innerHTML = isPaused ? "&#9654;" : "&#9646;&#9646;";
+  }
+
+  function removeAllUI() {
+    [overlayTop, overlayBottom].forEach((el) => {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    });
+    overlayTop = null;
+    overlayBottom = null;
+    removeProgressUI();
+    removeControls();
   }
 
   function applyHighlight(el) {
     const color = settings.highlightColor;
-
     el.classList.add("readfocus-paragraph-highlight");
+
+    el.dataset.rfOrigPadding = el.style.padding || "";
+    el.dataset.rfOrigMargin = el.style.margin || "";
+    el.dataset.rfOrigBg = el.style.background || "";
+    el.dataset.rfOrigShadow = el.style.boxShadow || "";
+    el.dataset.rfOrigBorder = el.style.borderBottom || "";
+    el.dataset.rfOrigPaddingBottom = el.style.paddingBottom || "";
 
     if (settings.highlightStyle === "glow") {
       el.style.background = hexToRgba(color, 0.1);
@@ -173,15 +219,24 @@
 
   function removeHighlight(el) {
     el.classList.remove("readfocus-paragraph-highlight");
-    el.style.background = "";
-    el.style.boxShadow = "";
-    el.style.padding = "";
-    el.style.margin = "";
-    el.style.borderBottom = "";
-    el.style.paddingBottom = "";
+    el.style.padding = el.dataset.rfOrigPadding || "";
+    el.style.margin = el.dataset.rfOrigMargin || "";
+    el.style.background = el.dataset.rfOrigBg || "";
+    el.style.boxShadow = el.dataset.rfOrigShadow || "";
+    el.style.borderBottom = el.dataset.rfOrigBorder || "";
+    el.style.paddingBottom = el.dataset.rfOrigPaddingBottom || "";
+
+    delete el.dataset.rfOrigPadding;
+    delete el.dataset.rfOrigMargin;
+    delete el.dataset.rfOrigBg;
+    delete el.dataset.rfOrigShadow;
+    delete el.dataset.rfOrigBorder;
+    delete el.dataset.rfOrigPaddingBottom;
   }
 
   function updateOverlays(el) {
+    if (!overlayTop || !overlayBottom) return;
+
     const rect = el.getBoundingClientRect();
     const padding = 8;
 
@@ -189,9 +244,8 @@
     overlayTop.style.height = Math.max(0, rect.top - padding) + "px";
     overlayTop.style.background = `rgba(0,0,0,${settings.dimOpacity})`;
 
-    overlayBottom.style.top = rect.bottom + padding + "px";
-    overlayBottom.style.height =
-      Math.max(0, window.innerHeight - rect.bottom - padding) + "px";
+    overlayBottom.style.top = (rect.bottom + padding) + "px";
+    overlayBottom.style.height = Math.max(0, window.innerHeight - rect.bottom - padding) + "px";
     overlayBottom.style.background = `rgba(0,0,0,${settings.dimOpacity})`;
   }
 
@@ -204,17 +258,17 @@
   }
 
   function scrollToElement(el) {
-    if (!settings.autoScroll) return;
-
     const rect = el.getBoundingClientRect();
     const viewportCenter = window.innerHeight / 2;
     const elementCenter = rect.top + rect.height / 2;
     const offset = elementCenter - viewportCenter;
 
-    window.scrollBy({
-      top: offset,
-      behavior: settings.scrollBehavior,
-    });
+    if (Math.abs(offset) > 50) {
+      window.scrollBy({
+        top: offset,
+        behavior: settings.scrollBehavior,
+      });
+    }
   }
 
   function moveTo(index) {
@@ -232,25 +286,26 @@
 
     requestAnimationFrame(() => {
       updateOverlays(el);
+      updateProgress();
     });
-
-    updateProgress();
   }
 
   function findNearestParagraph() {
+    if (!paragraphs.length) return 0;
+
     const viewportCenter = window.innerHeight / 2;
     let closest = 0;
     let minDist = Infinity;
 
-    paragraphs.forEach((el, i) => {
-      const rect = el.getBoundingClientRect();
+    for (let i = 0; i < paragraphs.length; i++) {
+      const rect = paragraphs[i].getBoundingClientRect();
       const center = rect.top + rect.height / 2;
       const dist = Math.abs(center - viewportCenter);
       if (dist < minDist) {
         minDist = dist;
         closest = i;
       }
-    });
+    }
 
     return closest;
   }
@@ -259,13 +314,16 @@
     stopAutoScroll();
     if (!settings.autoScroll || isPaused) return;
 
-    const intervalMs = Math.max(500, 5000 - settings.scrollSpeed * 500);
+    const intervalMs = Math.max(800, 5500 - settings.scrollSpeed * 550);
 
     autoScrollInterval = setInterval(() => {
       if (currentIndex < paragraphs.length - 1) {
         moveTo(currentIndex + 1);
       } else {
         stopAutoScroll();
+        isPaused = true;
+        const pauseBtn = controlsEl?.querySelector(".readfocus-btn-pause");
+        updatePauseButton(pauseBtn);
       }
     }, intervalMs);
   }
@@ -280,7 +338,8 @@
   function handleKeyDown(e) {
     if (!isActive) return;
 
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) {
+    const tag = e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target.isContentEditable) {
       return;
     }
 
@@ -288,15 +347,21 @@
       e.preventDefault();
       stopAutoScroll();
       isPaused = true;
+      const pauseBtn = controlsEl?.querySelector(".readfocus-btn-pause");
+      updatePauseButton(pauseBtn);
       moveTo(currentIndex + 1);
     } else if (e.code === settings.keyPrev) {
       e.preventDefault();
       stopAutoScroll();
       isPaused = true;
+      const pauseBtn = controlsEl?.querySelector(".readfocus-btn-pause");
+      updatePauseButton(pauseBtn);
       moveTo(currentIndex - 1);
     } else if (e.code === "Space") {
       e.preventDefault();
       isPaused = !isPaused;
+      const pauseBtn = controlsEl?.querySelector(".readfocus-btn-pause");
+      updatePauseButton(pauseBtn);
       if (isPaused) {
         stopAutoScroll();
       } else {
@@ -332,32 +397,39 @@
     scrollTimeout = setTimeout(() => {
       scrollTimeout = null;
       handleScroll();
-    }, 100);
+    }, 80);
   }
 
   function activate() {
     if (isActive) return;
 
     paragraphs = collectParagraphs();
-    if (paragraphs.length === 0) return;
+    if (paragraphs.length === 0) {
+      console.log("[ReadFocus] No paragraphs found on this page.");
+      return;
+    }
+
+    console.log(`[ReadFocus] Found ${paragraphs.length} paragraphs.`);
 
     isActive = true;
+    isPaused = false;
     createOverlays();
 
-    if (settings.showControls) {
-      createControls();
-    }
+    if (settings.showProgress) createProgressUI();
+    if (settings.showControls) createControls();
 
     const startIndex = findNearestParagraph();
     moveTo(startIndex);
 
     document.addEventListener("keydown", handleKeyDown, true);
     window.addEventListener("scroll", throttledScroll, { passive: true });
-    window.addEventListener("resize", () => {
+
+    resizeHandler = () => {
       if (isActive && currentIndex >= 0 && currentIndex < paragraphs.length) {
         updateOverlays(paragraphs[currentIndex]);
       }
-    });
+    };
+    window.addEventListener("resize", resizeHandler);
 
     if (settings.autoScroll && !isPaused) {
       startAutoScroll();
@@ -375,10 +447,14 @@
       removeHighlight(paragraphs[currentIndex]);
     }
 
-    removeUI();
+    removeAllUI();
 
     document.removeEventListener("keydown", handleKeyDown, true);
     window.removeEventListener("scroll", throttledScroll);
+    if (resizeHandler) {
+      window.removeEventListener("resize", resizeHandler);
+      resizeHandler = null;
+    }
 
     paragraphs = [];
     currentIndex = -1;
@@ -415,9 +491,43 @@
       } else {
         deactivate();
       }
+      return;
     }
 
-    if (isActive && !changes.enabled) {
+    if (!isActive) return;
+
+    if (changes.showControls) {
+      if (settings.showControls) {
+        createControls();
+      } else {
+        removeControls();
+      }
+    }
+
+    if (changes.showProgress) {
+      if (settings.showProgress) {
+        createProgressUI();
+        updateProgress();
+      } else {
+        removeProgressUI();
+      }
+    }
+
+    if (changes.autoScroll) {
+      if (settings.autoScroll && !isPaused) {
+        startAutoScroll();
+      } else {
+        stopAutoScroll();
+      }
+    }
+
+    if (changes.scrollSpeed) {
+      if (autoScrollInterval) {
+        startAutoScroll();
+      }
+    }
+
+    if (changes.highlightColor || changes.highlightStyle || changes.dimOpacity) {
       if (currentIndex >= 0 && currentIndex < paragraphs.length) {
         removeHighlight(paragraphs[currentIndex]);
         applyHighlight(paragraphs[currentIndex]);
@@ -440,7 +550,9 @@
           removeHighlight(paragraphs[currentIndex]);
         }
         paragraphs = collectParagraphs();
-        moveTo(Math.min(wasIndex, paragraphs.length - 1));
+        if (paragraphs.length > 0) {
+          moveTo(Math.min(wasIndex, paragraphs.length - 1));
+        }
       }
     }
   });
