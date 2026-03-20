@@ -1,0 +1,108 @@
+.readfocus-overlay--top,
+.readfocus-overlay--bottom {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 2147483640;
+  transition: height 0.25s ease, background 0.25s ease;
+}
+
+.readfocus-paragraph-highlight {
+  position: relative;
+  z-index: 2147483641;
+  border-radius: 6px;
+  transition: background 0.25s ease, box-shadow 0.25s ease, border-bottom 0.25s ease;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.readfocus-controls {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483645;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  animation: readfocus-fade-in 0.3s ease;
+}
+
+.readfocus-controls button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  color: #fff;
+  background: #4f46e5;
+  line-height: 1;
+}
+
+.readfocus-controls button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4);
+}
+
+.readfocus-controls button:active {
+  transform: scale(0.95);
+}
+
+.readfocus-controls button.readfocus-btn-stop {
+  background: #ef4444;
+}
+
+.readfocus-controls button.readfocus-btn-stop:hover {
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+}
+
+.readfocus-controls button.readfocus-btn-pause {
+  background: #f59e0b;
+}
+
+.readfocus-controls button.readfocus-btn-pause:hover {
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+}
+
+.readfocus-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+  z-index: 2147483645;
+  transition: width 0.35s ease;
+  border-radius: 0 2px 2px 0;
+  pointer-events: none;
+}
+
+.readfocus-counter {
+  position: fixed;
+  top: 8px;
+  right: 12px;
+  z-index: 2147483645;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.85);
+  padding: 4px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  animation: readfocus-fade-in 0.3s ease;
+}
+
+@keyframes readfocus-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

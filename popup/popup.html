@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReadFocus</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup">
+    <header class="header">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="#4f46e5"/>
+          <path d="M7 8h14M7 14h10M7 20h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="22" cy="14" r="3" fill="#fbbf24" stroke="#4f46e5" stroke-width="1"/>
+        </svg>
+        <h1>ReadFocus</h1>
+      </div>
+      <p class="tagline">Stay focused. Never lose your place.</p>
+    </header>
+
+    <div class="toggle-section">
+      <label class="toggle-label">
+        <span>Enable ReadFocus</span>
+        <div class="toggle-switch">
+          <input type="checkbox" id="toggleEnabled" />
+          <span class="toggle-slider"></span>
+        </div>
+      </label>
+    </div>
+
+    <div class="settings-section">
+      <div class="setting-group">
+        <label class="setting-label">Highlight Color</label>
+        <div class="color-options" id="colorOptions">
+          <button class="color-btn active" data-color="#4f46e5" style="background:#4f46e5" title="Indigo"></button>
+          <button class="color-btn" data-color="#7c3aed" style="background:#7c3aed" title="Purple"></button>
+          <button class="color-btn" data-color="#2563eb" style="background:#2563eb" title="Blue"></button>
+          <button class="color-btn" data-color="#059669" style="background:#059669" title="Green"></button>
+          <button class="color-btn" data-color="#d97706" style="background:#d97706" title="Amber"></button>
+          <button class="color-btn" data-color="#dc2626" style="background:#dc2626" title="Red"></button>
+          <input type="color" id="customColor" class="color-custom" value="#4f46e5" title="Custom color" />
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Highlight Style</label>
+        <div class="style-options" id="styleOptions">
+          <button class="style-btn active" data-style="glow">Glow</button>
+          <button class="style-btn" data-style="underline">Underline</button>
+          <button class="style-btn" data-style="background">Background</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">
+          Dim Opacity
+          <span class="setting-value" id="dimValue">45%</span>
+        </label>
+        <input type="range" id="dimOpacity" min="0" max="80" value="45" class="slider" />
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">
+          Auto-scroll Speed
+          <span class="setting-value" id="speedValue">3</span>
+        </label>
+        <input type="range" id="scrollSpeed" min="1" max="8" value="3" class="slider" />
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-label small">
+          <span>Auto-scroll</span>
+          <div class="toggle-switch small">
+            <input type="checkbox" id="toggleAutoScroll" checked />
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-label small">
+          <span>Show controls on page</span>
+          <div class="toggle-switch small">
+            <input type="checkbox" id="toggleControls" checked />
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-label small">
+          <span>Show progress bar</span>
+          <div class="toggle-switch small">
+            <input type="checkbox" id="toggleProgress" checked />
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="btnRefresh" class="btn btn-secondary" title="Re-scan paragraphs on page">
+        Refresh Paragraphs
+      </button>
+    </div>
+
+    <footer class="footer">
+      <div class="shortcuts">
+        <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate</span>
+        <span><kbd>Space</kbd> Pause</span>
+        <span><kbd>Esc</kbd> Stop</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

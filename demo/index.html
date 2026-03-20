@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReadFocus Demo - Test Page</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      line-height: 1.8;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 24px 120px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #4f46e5;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 16px;
+      margin-bottom: 40px;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 24px;
+    }
+
+    h2 {
+      font-size: 22px;
+      color: #c7d2fe;
+      margin: 40px 0 16px;
+      padding-left: 12px;
+      border-left: 3px solid #4f46e5;
+    }
+
+    h3 {
+      font-size: 17px;
+      color: #a5b4fc;
+      margin: 28px 0 12px;
+    }
+
+    p {
+      color: #cbd5e1;
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    ul, ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+
+    li {
+      color: #cbd5e1;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    blockquote {
+      border-left: 3px solid #7c3aed;
+      padding: 12px 20px;
+      margin: 20px 0;
+      background: rgba(124, 58, 237, 0.08);
+      border-radius: 0 8px 8px 0;
+      color: #a5b4fc;
+      font-style: italic;
+    }
+
+    pre {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      color: #a5f3fc;
+      line-height: 1.6;
+    }
+
+    .instructions-box {
+      background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(124,58,237,0.1));
+      border: 1px solid #4f46e5;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 30px 0;
+    }
+
+    .instructions-box h3 {
+      margin-top: 0;
+      color: #818cf8;
+    }
+
+    .instructions-box ol {
+      color: #c7d2fe;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 12px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      color: #e2e8f0;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">READFOCUS DEMO</span>
+    <h1>Welcome to ReadFocus</h1>
+    <p class="subtitle">This is a test page with plenty of paragraphs. Enable ReadFocus from the extension popup to see it in action.</p>
+
+    <div class="instructions-box">
+      <h3>How to test:</h3>
+      <ol>
+        <li>Click the <strong>ReadFocus</strong> icon in your Chrome toolbar</li>
+        <li>Toggle <strong>Enable ReadFocus</strong> to ON</li>
+        <li>Watch the current paragraph light up and surrounding text dim</li>
+        <li>Use <kbd>Arrow Down</kbd> / <kbd>Arrow Up</kbd> to navigate paragraphs</li>
+        <li>Press <kbd>Space</kbd> to pause/resume auto-scroll</li>
+        <li>Press <kbd>Escape</kbd> to stop</li>
+      </ol>
+    </div>
+
+    <h2>What is ReadFocus?</h2>
+
+    <p>ReadFocus is a Chrome extension designed to help you stay focused while reading long-form content on the web. Whether you're reading a ChatGPT response, a technical article, or documentation, ReadFocus keeps track of exactly where you are.</p>
+
+    <p>The core idea is simple: highlight the paragraph you're currently reading and dim everything else. This way, your eyes always know where to look, and you never lose your place when you glance away from the screen.</p>
+
+    <p>This is especially useful when you're reading content aloud, presenting, or switching between your screen and notes. The visual anchor provided by ReadFocus means you can look away and instantly find where you left off.</p>
+
+    <h2>Key Features</h2>
+
+    <h3>Paragraph Detection</h3>
+
+    <p>ReadFocus automatically scans the current page and identifies all readable text blocks. It looks for standard HTML elements like paragraphs, list items, headings, blockquotes, and code blocks. It also has special selectors for popular platforms like ChatGPT, Medium, and documentation sites.</p>
+
+    <p>The detection algorithm filters out invisible elements, very short text, and nested/overlapping blocks. The result is a clean, ordered list of paragraphs from top to bottom of the page.</p>
+
+    <h3>Smart Highlighting</h3>
+
+    <p>When ReadFocus is active, the current paragraph receives a visual highlight. You can choose from three styles:</p>
+
+    <ul>
+      <li><strong>Glow</strong> - A soft background color with a left accent bar and outer glow. This is the default and works well on dark and light backgrounds.</li>
+      <li><strong>Underline</strong> - A colored line under the active paragraph. Minimal and clean.</li>
+      <li><strong>Background</strong> - A solid color fill behind the text. High visibility for text-heavy pages.</li>
+    </ul>
+
+    <h3>Dimming Overlay</h3>
+
+    <p>Everything above and below the active paragraph is covered by a semi-transparent dark overlay. This creates a "spotlight" effect that draws your eyes to exactly the right place. The opacity is adjustable from 0% (no dimming) to 80% (heavy dimming).</p>
+
+    <blockquote>The dimming effect is like putting on reading glasses for your browser. It eliminates visual clutter and lets you focus on one thing at a time.</blockquote>
+
+    <h3>Auto-Scroll</h3>
+
+    <p>ReadFocus can automatically advance to the next paragraph at a configurable speed. This is perfect for hands-free reading, presentations, or when you want a steady reading pace. The speed ranges from 1 (very slow, about 5 seconds per paragraph) to 8 (fast, less than 1 second per paragraph).</p>
+
+    <p>When auto-scroll reaches the last paragraph, it automatically pauses. You can resume by pressing Space or clicking the play button in the floating controls.</p>
+
+    <h3>Keyboard Navigation</h3>
+
+    <p>For manual control, ReadFocus responds to keyboard shortcuts. Arrow Down moves to the next paragraph, Arrow Up goes back. When you use the keyboard, auto-scroll automatically pauses so you can read at your own pace.</p>
+
+    <p>Pressing Space toggles between paused and playing states. Pressing Escape completely deactivates ReadFocus and restores the page to its original state.</p>
+
+    <h2>Use Cases</h2>
+
+    <h3>Reading ChatGPT Responses</h3>
+
+    <p>ChatGPT often produces long, detailed answers with multiple sections. When you're reading these aloud or presenting them to someone, it's easy to lose your place. ReadFocus highlights exactly where you are and dims the rest of the response.</p>
+
+    <p>ReadFocus has special CSS selectors built in that target ChatGPT's DOM structure, so paragraph detection works reliably on chat.openai.com.</p>
+
+    <h3>Studying Documentation</h3>
+
+    <p>Technical documentation pages can be extremely long. ReadFocus helps you methodically work through each section without skipping or re-reading. The progress bar at the top shows how far through the page you've gone.</p>
+
+    <h3>Presenting or Screen-Sharing</h3>
+
+    <p>When you're sharing your screen and reading content aloud, the highlighted paragraph tells your audience exactly what you're reading. The auto-scroll feature means you don't have to manually scroll and can focus entirely on speaking.</p>
+
+    <blockquote>A good presenter keeps the audience's attention. ReadFocus acts as a teleprompter for web content - your audience always knows what line you're on.</blockquote>
+
+    <h3>Accessibility</h3>
+
+    <p>For users with attention difficulties, dyslexia, or visual processing challenges, the paragraph-level focus and dimming can significantly improve reading comprehension. The customizable colors let users choose what works best for their vision.</p>
+
+    <h2>Technical Details</h2>
+
+    <p>ReadFocus is built as a Chrome Manifest V3 extension. It consists of a content script that runs on every page, a popup UI for settings, and a background service worker for handling extension commands.</p>
+
+    <pre>// Example: How ReadFocus detects paragraphs
+const selectors = ["p", "li", "h1", "h2", "h3", "blockquote", "pre"];
+const elements = document.querySelectorAll(selectors.join(", "));
+// Filter by visibility, text length, and DOM hierarchy</pre>
+
+    <p>All settings are persisted using Chrome's storage API and sync across tabs. When you change a setting in the popup, it takes effect immediately on the active page.</p>
+
+    <p>The overlays use fixed positioning with very high z-index values to ensure they render above all page content. The highlighted paragraph gets an elevated z-index to "pop out" above the dimming overlays.</p>
+
+    <h2>Customization</h2>
+
+    <p>ReadFocus offers extensive customization through its popup interface. You can change the highlight color from six presets (indigo, purple, blue, green, amber, red) or use a custom color picker for any color you want.</p>
+
+    <p>The highlight style, dim opacity, scroll speed, and visibility of on-page controls are all configurable. Your preferences are saved automatically and persist across browser sessions.</p>
+
+    <p>If new content loads on the page (like a new ChatGPT response appearing), you can click "Refresh Paragraphs" in the popup to re-scan the page without losing your position.</p>
+
+    <h2>Final Thoughts</h2>
+
+    <p>ReadFocus transforms passive web reading into an active, focused experience. By highlighting where you are and dimming where you aren't, it eliminates the most common frustration of long-form reading: losing your place.</p>
+
+    <p>Try it now on this page. Toggle it on, sit back, and let the paragraphs scroll by. Or use the arrow keys to move through at your own pace. Either way, you'll always know exactly where you are.</p>
+
+    <p>Thank you for trying ReadFocus. If you find it useful, consider sharing it with others who might benefit from a more focused reading experience on the web.</p>
+  </div>
+</body>
+</html>
